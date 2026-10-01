@@ -31,5 +31,5 @@ PostSchema.index({ tags: 1 });
 PostSchema.index({ author: 1 });
 PostSchema.index({ createdAt: -1 });
 
-// Export the compiled Post model based on the schema.
+// Export the compiled Post model based on the schema
 export default mongoose.model("Post", PostSchema);
