@@ -97,3 +97,63 @@ export const getPostById = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+// Updates a post — only the original author may do this
+export const updatePost = async (req, res) => {
+  const { id } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: "Invalid post id" });
+  }
+
+  try {
+    const post = await Post.findById(id);
+
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    // Ownership check: compare the post's author to the logged-in user
+    if (post.author.toString() !== req.user.id) {
+      return res.status(403).json({ message: "Not authorized to update this post" });
+    }
+
+    const { title, body, tags } = req.body;
+    if (title !== undefined) post.title = title;
+    if (body !== undefined) post.body = body;
+    if (tags !== undefined) post.tags = tags;
+
+    await post.save();
+
+    res.status(200).json({ post });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Deletes a post — only the original author may do this
+export const deletePost = async (req, res) => {
+  const { id } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: "Invalid post id" });
+  }
+
+  try {
+    const post = await Post.findById(id);
+
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    if (post.author.toString() !== req.user.id) {
+      return res.status(403).json({ message: "Not authorized to delete this post" });
+    }
+
+    await post.deleteOne();
+
+    res.status(200).json({ message: "Post deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
