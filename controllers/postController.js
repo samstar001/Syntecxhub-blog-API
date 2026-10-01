@@ -77,7 +77,7 @@ export const getPosts = async (req, res) => {
 };
 
 // Fetches a single post by its MongoDB _id
-export const getPostById = async (req, res) => {
+export const getPostById = async (req, res, next) => {
   const { id } = req.params;
 
   // Check the ID is even shaped like a valid ObjectId before querying
@@ -94,7 +94,7 @@ export const getPostById = async (req, res) => {
 
     res.status(200).json({ post });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err); // hands it to errorHandler.js
   }
 };
 
