@@ -1,4 +1,5 @@
 // controllers/postController.js
+import mongoose from "mongoose";
 import Post from "../models/Post.js";
 
 // Creates a new post, owned by the logged-in user
@@ -70,6 +71,28 @@ export const getPosts = async (req, res) => {
       data: posts,
       pagination: { page, limit, total, returned: posts.length },
     });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Fetches a single post by its MongoDB _id
+export const getPostById = async (req, res) => {
+  const { id } = req.params;
+
+  // Check the ID is even shaped like a valid ObjectId before querying
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: "Invalid post id" });
+  }
+
+  try {
+    const post = await Post.findById(id);
+
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    res.status(200).json({ post });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
